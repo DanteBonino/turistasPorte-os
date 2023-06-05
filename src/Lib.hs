@@ -20,7 +20,7 @@ data Atraccion = Atraccion{
 --Si no se podría crear un criterio arbitrario que reciba un String -> Bool. Pero no sé bien a qué se refiere la consigna
 --Punto 2:
 lugaresALosQuePuedeIr :: Persona -> [Lugar] -> [String]
-lugaresALosQuePuedeIr unaPersona  =  map nombreLugar . filter (snd unaPersona)
+lugaresALosQuePuedeIr unaPersona  =  map nombreLugar . filter (sePuedeIr)
 
 nombreLugar :: Lugar -> String
 nombreLugar (unNombre,_, _) = unNombre
@@ -56,8 +56,8 @@ cuantosPuedenIr unasPersonas unLugar = foldr (sumarSiPuedeIr unLugar) 0 unasPers
 
 sumarSiPuedeIr :: Lugar -> Persona -> ( Int -> Int)
 sumarSiPuedeIr unLugar unaPersona
-    | (snd unaPersona) unLugar = (+1)
-    | otherwise                = (+0)
+    | sePuedeIr unLugar = (+1)
+    | otherwise         = (+0)
     
 mayorSegunCantidadDeTuristas :: [(String, Int)] -> (String , Int)
 mayorSegunCantidadDeTuristas  = foldl1 (mayorSegun snd)
@@ -66,3 +66,23 @@ mayorSegun :: (Ord b) => (a -> b) -> a -> a -> a
 mayorSegun transf unValor otroValor
     | transf unValor > transf otroValor = unValor
     | otherwise                        = otroValor
+--Punto 4:
+todosPuedenIr ::Lugar -> [Persona] -> Bool
+todosPuedenIr unLugar = all (flip sePuedeIr unLugar)
+
+sePuedeIr :: Persona -> Lugar -> Bool
+sePuedeIr unaPersona = snd unaPersona
+
+--Punto 5:
+lugaresDondeTodosPuedenIr :: [Persona] -> [Lugar] -> [Lugar]
+lugaresDondeTodosPuedenIr unasPersonas = filter (flip todosPuedenIr unasPersonas)
+
+ejemplo :: [Lugar]
+ejemplo = lugaresDondeTodosPuedenIr [("dante", playero), ("fede", playero), ("pablo", gastronomico)] [("Mar del Plata", 400, [Atraccion "Playa" False, Atraccion "Alfajores" True]), ("Rosario", 300, [Atraccion "Rio" False, Atraccion "Monumento a la bandera" False])]
+
+--Muestra por pantalla :
+-- ("Mar del Plata", 400, [Atraccion "Playa" False, Atraccion "Alfajores" True])
+
+--Punto 6:
+nuevaPersona :: Persona
+nuevaPersona = ("nuevaPersona", (\lugar -> ((>12). length . nombreLugar) lugar))
